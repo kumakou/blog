@@ -7,7 +7,7 @@ export default function Logo(props) {
     <Box {...props}>
       <Link href="/">
         <Text fontSize="lg" fontWeight="bold">
-          Kuma's Blog
+          Kuma&apos;s Blog
         </Text>
       </Link>
     </Box>
