@@ -1,5 +1,6 @@
-import Link from "next/link"
+import { load } from "cheerio"
 import { client } from "../libs/client"
+import BlogPost from "/components/BlogPost"
 
 export default function Home({ blog }) {
   return (
@@ -8,7 +9,17 @@ export default function Home({ blog }) {
         {blog.map((blog) => {
           return (
             <li key={blog.id}>
-              <Link href={`/blog/${blog.id}`}>{blog.title}</Link>
+              <BlogPost
+                title={blog.title}
+                id={blog.id}
+                img={
+                  blog.hasOwnProperty("eyecatch")
+                    ? blog.eyecatch.url
+                    : "https://bit.ly/2Z4KKcF"
+                }
+                content={blog.content}
+                updatedAt={blog.updatedAt}
+              />
             </li>
           )
         })}
@@ -18,10 +29,23 @@ export default function Home({ blog }) {
 }
 
 export const getStaticProps = async () => {
-  const data = await client.get({
+  let data = await client.get({
     endpoint: "blogs",
   })
-  console.log(data)
+
+  const { contents } = data
+  contents.map((blog_data, i) => {
+    let text = ""
+    const $ = load(blog_data.content)
+    $("p").each((_, element) => {
+      text = text + $(element).text()
+    })
+
+    if (text.length > 100) {
+      text = text.slice(0, 100) + "..."
+    }
+    data.contents[i] = { ...blog_data, content: text }
+  })
 
   return {
     props: {
